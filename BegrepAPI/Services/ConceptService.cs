@@ -22,14 +22,16 @@ namespace BegrepAPI.Services
             var requestBody = new { page = page };
             var response = await _client.PostAsJsonAsync("concepts", requestBody);
 
-            if (response.IsSuccessStatusCode)
-            {
-                var responseString = await response.Content.ReadAsStringAsync();
-                var concepts = JsonConvert.DeserializeObject<List<Concept>>(responseString);
-                return concepts;
-            }
+            if (!response.IsSuccessStatusCode)
+                throw new HttpRequestException($"Failed to fetch concepts: {response.ReasonPhrase}");
 
-            throw new Exception($"Failed to fetch concepts. Status code: {response.StatusCode}");
+            
+            var responseString = await response.Content.ReadAsStringAsync();
+
+            //Assuming that mapping of the response to the model will happen here
+            var concepts = JsonConvert.DeserializeObject<List<Concept>>(responseString);
+
+            return concepts;
         }
 
         public async Task<Concept> GetConceptAsync(string id)
@@ -37,13 +39,15 @@ namespace BegrepAPI.Services
             _logger.LogInformation($"Fetching concept with ID {id} from Felles Datakatalog");
             var response = await _client.GetAsync($"concepts/{id}");
 
-            if (response.IsSuccessStatusCode)
-            {
-                var responseString = await response.Content.ReadAsStringAsync();
-                return JsonConvert.DeserializeObject<Concept>(responseString);
-            }
+            if (!response.IsSuccessStatusCode)
+                throw new HttpRequestException($"Failed to fetch concept with ID {id}. Status code: {response.StatusCode}");
 
-            throw new Exception($"Failed to fetch concept with ID {id}. Status code: {response.StatusCode}");
+            var responseString = await response.Content.ReadAsStringAsync();
+
+            //Assuming that mapping of the response to the model will happen here
+            var concept = JsonConvert.DeserializeObject<Concept>(responseString);
+            
+            return concept;
         }
     }
 }

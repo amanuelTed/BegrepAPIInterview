@@ -3,6 +3,6 @@
     public class Definition
     {
         public string Tekst { get; set; }
-        public string LastUpdated { get; set; }
+        public DateTime LastUpdated { get; set; }
     }
 }
